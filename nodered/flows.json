@@ -1,0 +1,452 @@
+[
+    {
+        "id": "8ee472871ed19113",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "08f069ff5ed65557",
+        "type": "MySQLdatabase",
+        "name": "MySQL Controle Presença",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "controle_presenca",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "d399cac5bb222c26",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "2083c474383ee484",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "4b99c82a6c8d2dba",
+        "type": "ui-page",
+        "name": "Controle de Presença",
+        "ui": "d399cac5bb222c26",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "2083c474383ee484",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "bbe620245e030ecc",
+        "type": "ui-group",
+        "name": "Indicadores",
+        "page": "4b99c82a6c8d2dba",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "3ba869d08ef64de7",
+        "type": "ui-group",
+        "name": "Últimas Presenças",
+        "page": "4b99c82a6c8d2dba",
+        "width": 6,
+        "height": 1,
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "38f76f7a815b2d8b",
+        "type": "mysql",
+        "z": "8ee472871ed19113",
+        "mydb": "08f069ff5ed65557",
+        "name": "Registrar Presença no MySQL",
+        "x": 470,
+        "y": 60,
+        "wires": [
+            [
+                "08297c322c9ddc09",
+                "4b5372a7945a5eb8"
+            ]
+        ]
+    },
+    {
+        "id": "2db616278e70812d",
+        "type": "http in",
+        "z": "8ee472871ed19113",
+        "name": "Receber Presença",
+        "url": "/presenca",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 90,
+        "y": 180,
+        "wires": [
+            [
+                "766b702ed7849c4e"
+            ]
+        ]
+    },
+    {
+        "id": "766b702ed7849c4e",
+        "type": "json",
+        "z": "8ee472871ed19113",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 210,
+        "y": 60,
+        "wires": [
+            [
+                "d26aaffadb89af34"
+            ]
+        ]
+    },
+    {
+        "id": "d26aaffadb89af34",
+        "type": "function",
+        "z": "8ee472871ed19113",
+        "name": "Registrar Presença",
+        "func": "var ra = msg.payload.ra;\n\nif (!ra) {\n    msg.statusCode = 400;\n    msg.payload = {\n        sucesso: false,\n        erro: \"RA não informado\"\n    };\n    return msg;\n}\n\nmsg.topic = `\n    INSERT INTO presenca (ra, datahora)\n    SELECT '${ra}', NOW()\n    FROM alunos\n    WHERE ra = '${ra}'\n    LIMIT 1\n`;\n\nmsg.payload = {\n    sucesso: true,\n    ra: ra\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 180,
+        "wires": [
+            [
+                "38f76f7a815b2d8b"
+            ]
+        ]
+    },
+    {
+        "id": "08297c322c9ddc09",
+        "type": "http response",
+        "z": "8ee472871ed19113",
+        "name": "HTTP Response",
+        "statusCode": "200",
+        "headers": {},
+        "x": 800,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "4b5372a7945a5eb8",
+        "type": "debug",
+        "z": "8ee472871ed19113",
+        "name": "DEBUG",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "8cf5376f2f217a97",
+        "type": "ui-table",
+        "z": "8ee472871ed19113",
+        "group": "3ba869d08ef64de7",
+        "name": "",
+        "label": "Presenças Registradas",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "maxrows": 0,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "columns": [],
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "append",
+        "className": "",
+        "x": 790,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6f0f7e1afe58f1bb",
+        "type": "inject",
+        "z": "8ee472871ed19113",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 320,
+        "wires": [
+            [
+                "12c87bedd6228fa5",
+                "e931af22ce09d665"
+            ]
+        ]
+    },
+    {
+        "id": "12c87bedd6228fa5",
+        "type": "function",
+        "z": "8ee472871ed19113",
+        "name": "SQL Buscar Presenças",
+        "func": "msg.topic = `\n    SELECT \n        p.id,\n        a.ra AS RA,\n        a.nome AS Nome,\n        a.curso AS Curso,\n        DATE_FORMAT(p.datahora, '%d/%m/%Y %H:%i:%s') AS 'Data/Hora'\n    FROM presenca p\n    JOIN alunos a ON p.ra = a.ra\n    ORDER BY p.datahora DESC\n    LIMIT 10;\n`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "d024bc510ba8e629"
+            ]
+        ]
+    },
+    {
+        "id": "d024bc510ba8e629",
+        "type": "mysql",
+        "z": "8ee472871ed19113",
+        "mydb": "08f069ff5ed65557",
+        "name": "",
+        "x": 560,
+        "y": 320,
+        "wires": [
+            [
+                "8cf5376f2f217a97"
+            ]
+        ]
+    },
+    {
+        "id": "e931af22ce09d665",
+        "type": "function",
+        "z": "8ee472871ed19113",
+        "name": "SQL Contar Alunos",
+        "func": "msg.topic = `\n    SELECT \n        (SELECT COUNT(*) FROM alunos) AS total_alunos,\n        (SELECT COUNT(DISTINCT ra) FROM presenca WHERE DATE(datahora) = CURDATE()) AS presentes_hoje;\n`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 420,
+        "wires": [
+            [
+                "0e580a01a414a7c9"
+            ]
+        ]
+    },
+    {
+        "id": "9eb488266ba64c94",
+        "type": "function",
+        "z": "8ee472871ed19113",
+        "name": "Formatar Indicadores",
+        "func": "if (!msg.payload || msg.payload.length === 0) return null;\n\nvar dados = msg.payload[0];\nvar total = dados.total_alunos || 0;\nvar presentes = dados.presentes_hoje || 0;\nvar ausentes = total - presentes;\n\nreturn [\n    { payload: total },\n    { payload: presentes },\n    { payload: ausentes < 0 ? 0 : ausentes }\n];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 440,
+        "wires": [
+            [
+                "101e8c80878504a1"
+            ],
+            [
+                "acd1ddcd4be6aa78"
+            ],
+            [
+                "82fa2d3602b17882"
+            ]
+        ]
+    },
+    {
+        "id": "101e8c80878504a1",
+        "type": "ui-text",
+        "z": "8ee472871ed19113",
+        "group": "bbe620245e030ecc",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Total de Alunos",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 1040,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "acd1ddcd4be6aa78",
+        "type": "ui-text",
+        "z": "8ee472871ed19113",
+        "group": "bbe620245e030ecc",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Presentes Hoje",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 1040,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "82fa2d3602b17882",
+        "type": "ui-text",
+        "z": "8ee472871ed19113",
+        "group": "bbe620245e030ecc",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Ausentes Hoje",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 1040,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "0e580a01a414a7c9",
+        "type": "mysql",
+        "z": "8ee472871ed19113",
+        "mydb": "08f069ff5ed65557",
+        "name": "",
+        "x": 560,
+        "y": 480,
+        "wires": [
+            [
+                "9eb488266ba64c94"
+            ]
+        ]
+    },
+    {
+        "id": "c1c5643894ae6e22",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mysql": "3.0.3",
+            "@flowfuse/node-red-dashboard": "1.30.2"
+        }
+    }
+]
